@@ -1,5 +1,5 @@
 # Super_Resolution quick-start
-<b>It's alwaýs a good idea to have conda installed and set this up in a new conda environment. See https://anaconda.org</b>
+<b>It's alwaýs a good idea to have conda installed and set this up in a new conda environment with python 3.7. See https://anaconda.org</b>
 
 Install the requirements:<br>
 <code>$ pip install -r requirements.txt</code>
