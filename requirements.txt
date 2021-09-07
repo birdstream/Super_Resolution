@@ -5,4 +5,4 @@ scikit-image
 fastapi
 uvicorn
 python-multipart
-
+aiofiles
