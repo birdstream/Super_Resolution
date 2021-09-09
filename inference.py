@@ -60,7 +60,7 @@ async def predict(bild: bytes = File(...)):
     for b in range(block_rows):
         for a in range(block_cols):
             pred_in = img_array[b,a,:,:].reshape(1, 224, 224, 3) # pick out the block to be predicted
-            predict = np.asarray(model(pred_in / norm)['target']).reshape(224, 224, 3) # make the prediction and reshape output (omit batch)
+            predict = np.asarray(model(pred_in)['target']).reshape(224, 224, 3) # make the prediction and reshape output (omit batch)
             img_array_out[(b * 208):(b * 208) + 208, (a * 208):(a * 208) + 208, :] = predict[8:216, 8:216, :] # put the predicted block in it's right place in the new array
     img_out = tf.keras.preprocessing.image.array_to_img(img_array_out) # convert array to image
     img_out = img_out.crop((0, 0, W, H)) # crop out the padding
