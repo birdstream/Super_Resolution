@@ -6,6 +6,7 @@ from skimage.util import view_as_blocks
 import io
 from fastapi import FastAPI, Response, File
 from fastapi.staticfiles import StaticFiles
+import webbrowser
 
 app = FastAPI()
 
@@ -26,9 +27,9 @@ async def predict(bild: bytes = File(...)):
     img = Image.open(io.BytesIO(bild)).convert("RGB")
     W, H = img.size
     
-    # Double the size of the image (it's because the way this model was trained)
-    W = W * 2
-    H = H * 2
+    # Upsample imgage 4x (it's because the way this model was trained)
+    W = W * 4
+    H = H * 4
     img = img.resize((W, H))
     
     # Since the model only takes the image in blocks of 208x208, we need to pad the image to be evenly divideable with this size
@@ -73,3 +74,4 @@ async def predict(bild: bytes = File(...)):
     
 app.mount("/", StaticFiles(directory="form"), name="form")
 
+webbrowser.open("http://localhost:8000/form.html")
