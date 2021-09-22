@@ -2,6 +2,8 @@
 <H1>Please select an image to be super-res'ed :)</H1>
 <form action="/predict/" method="post" enctype="multipart/form-data">
 <input type="file", name="bild", accept="image/*">
+<input type="checkbox", name="training">
+<label for="training">Use gaussian noise</label>
 <input type="submit">
 </form>
 </html>
