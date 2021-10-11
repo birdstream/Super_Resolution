@@ -4,9 +4,12 @@ import numpy as np
 #import argparse
 from skimage.util import view_as_windows
 import io
-from fastapi import FastAPI, Response, File, Form
+from fastapi import FastAPI, Response, File, UploadFile, Form
 from fastapi.staticfiles import StaticFiles
 import webbrowser
+import tensorflow_addons as tfa
+from starlette.responses import FileResponse
+import os
 
 app = FastAPI()
 
@@ -23,13 +26,17 @@ model = tf.keras.models.load_model('./model/')
 # Load the image and convert it to RGB (in case of grayscale, RGBA etc..)
 #img = Image.open(args.input).convert('RGB')
 @app.post("/predict/")
-async def predict(bild: bytes = File(...), training: bool = Form(False)):
-    img = Image.open(io.BytesIO(bild)).convert("RGB")
+async def predict(bild: UploadFile = File(...), magnify: int = Form(...)):
+    file_name = "{0}_{2}x.png".format(*os.path.splitext(bild.filename), magnify)
+    img = Image.open(bild.file).convert("RGB")
+    #img_1 = np.asarray(img)
+    #img_1 = tfa.image.gaussian_filter2d(img_1, filter_shape=3, sigma=1.0)
+    #img = tf.keras.preprocessing.image.array_to_img(img_1)
     W, H = img.size
     
     # Upsample imgage 4x (it's because the way this model was trained)
-    W = W * 4
-    H = H * 4
+    W = W * magnify
+    H = H * magnify
     img = img.resize((W, H))
     
     # Since the model only takes the image in blocks of 208x208, we need to pad the image to be evenly divideable with this size
@@ -59,15 +66,17 @@ async def predict(bild: bytes = File(...), training: bool = Form(False)):
     for b in range(block_rows):
         for a in range(block_cols):
             pred_in = img_array[b,a,:,:].reshape(1, 224, 224, 3) # pick out the block to be predicted
-            predict = np.asarray(model(pred_in, training = training)['target']).reshape(224, 224, 3) # make the prediction and reshape output (omit batch)
+            predict = np.asarray(model(pred_in)['target']).reshape(224, 224, 3) # make the prediction and reshape output (omit batch)
+            #predict = tfa.image.gaussian_filter2d(predict, filter_shape=12, sigma=4.0)
             img_array_out[(b * 208):(b * 208) + 208, (a * 208):(a * 208) + 208, :] = predict[8:216, 8:216, :] # put the predicted block in it's right place in the new array
     img_out = tf.keras.preprocessing.image.array_to_img(img_array_out) # convert array to image
     img_out = img_out.crop((0, 0, W, H)) # crop out the padding
+    img_out.save("4x.png", format='png')
     #img_out.show() # show it
-    img_byte_array = io.BytesIO()
-    img_out.save(img_byte_array, format='png')
-    img_byte_array = img_byte_array.getvalue()
-    return Response(img_byte_array, media_type="image/png")
+    #img_byte_array = io.BytesIO()
+    #img_out.save(img_byte_array, format='png')
+    #img_byte_array = img_byte_array.getvalue()
+    return FileResponse("4x.png", media_type="application/octet-stream", filename=file_name)
     #img_out.save(args.output) # save it
     
 app.mount("/", StaticFiles(directory="form"), name="form")

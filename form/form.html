@@ -2,8 +2,16 @@
 <H1>Please select an image to be super-res'ed :)</H1>
 <form action="/predict/" method="post" enctype="multipart/form-data">
 <input type="file", name="bild", accept="image/*">
-<input type="checkbox", name="training">
-<label for="training">Use gaussian noise</label>
+<h2>Magnification:</h2>
+<input type="radio", name="magnify", value="1">
+<label for="1x">1x</lable>
+<input type="radio", name="magnify", value="2">
+<label for="2x">2x</lable>
+<input type="radio", name="magnify", value="3">
+<label for="3x">3x</lable>
+<input type="radio", name="magnify", value="4" checked>
+<label for="4x">4x</lable>
+<br><br>
 <input type="submit">
 </form>
 </html>
